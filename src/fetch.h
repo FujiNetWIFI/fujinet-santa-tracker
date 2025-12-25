@@ -16,6 +16,6 @@
  * @brief Fetch data, feed back into response.
  * @param Response pointer to response struct
  */
-uint8_t fetch(Response *response);
+uint8_t fetch(int *lat, int *lon);
 
 #endif /* FETCH_H */

@@ -14,22 +14,20 @@
 #include "pause.h"
 #include "fetch.h"
 
-Response response;
+int lat=0;
+int lon=0;
 
 /**
  * @brief entrypoint
  */
 void main(void)
 {
-    screen(&response);
-
-    while(1);
     while(1)
     {
-        if (fetch(&response) != FN_ERR_OK)
+        if (fetch(&lat,&lon) != FN_ERR_OK)
             screen_error();
         else
-            screen(&response);
+            screen(lat,lon);
 
         pause();
     }

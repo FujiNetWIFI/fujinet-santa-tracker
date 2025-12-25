@@ -14,12 +14,17 @@
  */
 void pause(void)
 {
+    unsigned char c=0;
+
     // Clear jiffy clock.
     OS.rtclok[0]=OS.rtclok[1]=OS.rtclok[2]=0;
 
     // Wait and do a bit of color cycling.
     while (OS.rtclok[1]<60)
     {
-        OS.color1=OS.rtclok[2];
+        c++;
+        OS.color1 = (c & 0xF0) + 0x0A;
+        OS.pcolr0 = c++;
+        waitvsync();
     };
 }

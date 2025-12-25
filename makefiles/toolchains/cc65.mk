@@ -7,7 +7,7 @@ include $(MWD)/tc-common.mk
 
 CFLAGS += -O --cpu 6502
 ASFLAGS += --cpu 6502
-LDFLAGS +=
+LDFLAGS += --start-addr 0x0F00
 
 CFLAGS += -DGIT_VERSION='"$(GIT_VERSION)"'
 

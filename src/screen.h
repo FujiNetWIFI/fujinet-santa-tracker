@@ -20,6 +20,6 @@ void screen_error(void);
  * @brief show screen
  * @param response Pointer to Response struct
  */
-void screen(Response *response);
+void screen(int lat, int lon);
 
 #endif /* SCREEN_H */

@@ -9,9 +9,12 @@
 #include <atari.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 #include "../screen.h"
 #include "map.h"
 #include "charset.h"
+#include <stdlib.h>
+#include "latlon.h"
 
 /**
  * @brief Pointer to response screen display memory
@@ -48,7 +51,7 @@ void screen_putc(unsigned char *p, char c, unsigned char color)
     // Convert character to uppercase screencode and apply color
     c = toupper(c);
     c -= 0x20;
-    c <<= color;
+    c += color * 64;
 
     // Plot to screen.
     *p = c;
@@ -292,19 +295,59 @@ static void dlist_screen =
         &dlist_screen
     };
 
+const unsigned char sleigh[8] =
+    { 0x00,0x80,0xC4,0xFE,0x7C,0x01,0xFE,0x00 };
+
+const char* screen_osd_lat(int lat)
+{
+    if (lat<0)
+        return "*S";
+    else
+        return "*N";
+}
+
+const char* screen_osd_lon(int lon)
+{
+    if (lon<0)
+        return "*W";
+    else
+        return "*E";
+}
+
 /**
  * @brief show screen
  * @param response Pointer to Response struct
  */
-void screen(Response *response)
+void screen(int lat, int lon)
 {
+    int x=0;
+    int y=0;
+    char tmp[22];
+
+    OS.sdmctl = 0x3E;
     OS.sdlst = &dlist_screen;
+    OS.color0 = 0x0F;
     OS.color1 = 0xFF;
     OS.color4 = 0x42; // Red
-    OS.color2 = 0xBC; // Festive green
+    OS.color2 = 0xC8; // Festive green
+    OS.chbas = 0x7C;
 
+    ANTIC.pmbase = 0x70;
+
+    GTIA_WRITE.gractl = 0x03;
+
+    memset((unsigned char *)0x7000,0x00,2048);
     memcpy((unsigned char *)CHARSET,charset,sizeof(charset));
     memcpy((unsigned char *)SCREEN,map,sizeof(map));
 
-    OS.chbas = 0x7C;
+    sprintf(tmp,"LAT:%3d%s  LON:%3d%s",abs(lat),screen_osd_lat(lat),abs(lon),screen_osd_lon(lon));
+    screen_puts((unsigned char *)SCREEN_OSD, tmp, 0, 0, 0);
+    screen_puts((unsigned char *)SCREEN_OSD, "LAT:",0,0,3);
+    screen_puts((unsigned char *)SCREEN_OSD, "LON:",11,0,3);
+
+    x = lat_table[lat+90] + 32;
+    y = lon_table[lon+180] + 48;
+
+    GTIA_WRITE.hposp0 = x;
+    memcpy((unsigned char *)0x7400+y,sleigh,8);
 }
